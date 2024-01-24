@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block body_class %}fondo-login{% endblock %}
+
+{% block content %}
+
+<div class="contenedor-centrado">
+    <div class="login-form">
+        <h1>Iniciar Sesion</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{form.as_p}}
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+    </div>
+</div>
+
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+{% endblock %}
