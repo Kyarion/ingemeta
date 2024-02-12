@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Modificar Prioridad de Productos</h1>
+<form method="post">
+    {% csrf_token %}
+    <fieldset>
+        <legend>Productos de la Orden de Compra</legend>
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}: {{ field }} <!-- Renderizar el campo de prioridad junto con su etiqueta -->
+            </div>
+        {% endfor %}
+    </fieldset>
+    <button type="submit">Guardar</button>
+    <a href="{% url 'detalle_orden_compra' pk=orden_compra.pk %}">Volver</a>
+</form>
+{% endblock %}

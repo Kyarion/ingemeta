@@ -1,0 +1,10 @@
+<!-- cambio_rollo.html -->
+
+{% extends 'base.html' %}
+{% block content %}
+<h1>Iniciar Cambio de Rollo</h1>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Inicio Cambio de Rollo</button>
+</form>
+{% endblock %}

@@ -1,0 +1,70 @@
+<!-- crear_orden_compra.html -->
+
+{% extends 'base.html' %}
+{% block content %}
+<h1>Crear Orden de Compra</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ orden_form.as_p }}
+
+    <fieldset>
+        <legend>Ítems de Orden</legend>
+        {{ item_formset.management_form }}
+        <div id="formset-container">
+            <!-- Renderizar los formularios iniciales -->
+            {% for form in item_formset %}
+                <div class="item-form">
+                    {{ form.producto }}
+                    {{ form.cantidad }}
+                    {% if forloop.first %}
+                        <label for="{{ form.prioridad.id_for_label }}">Prioridad:</label>
+                        {{ form.prioridad }}
+                    {% endif %}
+                    {% if not forloop.first %}
+                        <button type="button" class="eliminar-producto">Eliminar</button>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" id="agregar_producto">Agregar Producto</button>
+        <button type="button" id="eliminar_ultimo_producto">Eliminar Último Producto</button>
+    </fieldset>
+
+    <button type="submit">Guardar Orden de Compra</button>
+</form>
+
+<!-- Plantilla para el nuevo formulario de ítem -->
+<div id="empty_form" style="display: none;">
+    <div class="item-form">{{ item_formset.empty_form }}</div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var agregarProductoBtn = document.getElementById('agregar_producto');
+        var eliminarUltimoProductoBtn = document.getElementById('eliminar_ultimo_producto');
+        var formsetContainer = document.getElementById('formset-container');
+        var emptyFormTemplate = document.getElementById('empty_form').innerHTML;
+        var formCount = parseInt("{{ item_formset.total_form_count }}");
+
+        agregarProductoBtn.addEventListener('click', function() {
+            var newForm = document.createElement('div');
+            newForm.classList.add('item-form');
+            newForm.innerHTML = emptyFormTemplate.replace(/__prefix__/g, formCount);
+            formsetContainer.appendChild(newForm);
+            formCount++;
+
+            // Actualizar el atributo 'total_form' del formset
+            document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+        });
+
+        eliminarUltimoProductoBtn.addEventListener('click', function() {
+            if (formsetContainer.children.length > 0) {
+                formsetContainer.removeChild(formsetContainer.lastElementChild);
+                formCount--;
+                // Actualizar el atributo 'total_form' del formset
+                document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+            }
+        });
+    });
+</script>
+{% endblock %}

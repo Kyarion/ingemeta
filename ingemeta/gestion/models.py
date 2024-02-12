@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 # Create your models here.
 """
@@ -18,28 +19,58 @@ class ProduccionIdeal(models.Model):
     produccionideal = models.IntegerField()
 
 class Produccion(models.Model):
+    TIPOS_CHOICES = [
+        ('cambio_rollo', 'Cambio de Rollo'),
+        ('despacho', 'Despacho'),
+        ('ingreso_material', 'Ingreso de Material'),
+        ('pana_mantencion', 'Pana o Mantención'),
+        ('produccion', 'Producción'),
+        ('setup_ajustes', 'Setup o Ajustes'),
+    ]
+
     nombre_producto = models.CharField(max_length=30)
     fecha_pedido = models.DateField(auto_now_add=True)
-    hora_inicio = models.TimeField()
-    hora_termino = models.TimeField()
-    tipo = models.CharField(max_length=30)
+    hora_inicio = models.TimeField(timezone.now())
+    hora_termino = models.TimeField(timezone.now())
+    tipo = models.CharField(max_length=30, choices=TIPOS_CHOICES)
     cantidad = models.IntegerField(default=0)
-    duracion_produccion = models.DurationField(null=True, blank=True)
-    produccion_por_hora = models.FloatField(null=True, blank=True)
     nota = models.TextField(blank=True)
+    en_curso = models.BooleanField(default=False)  # Flag para indicar si la producción está en curso
 
     def save(self, *args, **kwargs):
-        # Calcular la diferencia entre la hora de inicio y la de término
-        if self.hora_inicio and self.hora_termino:
-            diferencia = self.hora_termino - self.hora_inicio
-            self.duracion_produccion = diferencia
+        if not self.pk:  # Si es una nueva instancia
+            self.en_curso = True  # Marcar la producción como en curso al ser creada
+        super(Produccion, self).save(*args, **kwargs)
 
-            # Calcular la producción por hora
-            if diferencia.total_seconds() > 0:
-                produccion_por_hora = self.cantidad / (diferencia.total_seconds() / 3600)
-                self.produccion_por_hora = round(produccion_por_hora, 2)
+class Producto(models.Model):
+    nombre = models.CharField(max_length=100)
+    precio = models.IntegerField()
+    cantidad_en_stock = models.IntegerField(default=0)
+    codigo_producto = models.CharField(max_length=50, unique=True)
+    fecha_modificacion = models.DateField(auto_now=True)
+    ancho = models.IntegerField(default=0)
+    alto = models.IntegerField(default=0)
+    largo = models.FloatField(default=0)
+    diametro = models.FloatField(default=0)
 
-class Pedidos(models.Model):
-    id_pedido = models.IntegerField()
-    nombre_pedido = models.CharField(max_length=30)
+    def __str__(self):
+        return self.nombre
+
+class OrdenCompra(models.Model):
+    numero_orden = models.CharField(max_length=100, unique=True)
+    fecha_emision = models.DateField(auto_now_add=True)
+    fecha_entrega_esperada = models.DateField()
+    total_orden = models.IntegerField()
+    ESTADOS_ORDEN = [
+        ('PROCESO', 'En proceso'),
+        ('COMPLETADA', 'Completada'),
+        ('CANCELADA', 'Cancelada'),
+    ]
+    estado = models.CharField(max_length=20, choices=ESTADOS_ORDEN, default='PROCESO')
+
+class ItemOrden(models.Model):
+    orden_compra = models.ForeignKey(OrdenCompra, on_delete=models.CASCADE, related_name='items')
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
+    cantidad_producida = models.IntegerField(default=0)
+    prioridad = models.BooleanField(default=False)

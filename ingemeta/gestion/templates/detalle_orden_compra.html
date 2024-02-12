@@ -1,0 +1,28 @@
+<!-- detalle_orden_compra.html -->
+
+{% extends 'base.html' %}
+{% block content %}
+<h1>Detalle de la Orden de Compra</h1>
+<p><strong>Número de Orden:</strong> {{ orden_compra.numero_orden }}</p>
+<p><strong>Fecha de Emisión:</strong> {{ orden_compra.fecha_emision }}</p>
+<p><strong>Fecha de Entrega Esperada:</strong> {{ orden_compra.fecha_entrega_esperada }}</p>
+<p><strong>Total de la Orden:</strong> {{ orden_compra.total_orden }}</p>
+<p><strong>Estado:</strong> {{ orden_compra.estado }}</p>
+
+<h2>Ítems de la Orden</h2>
+<ul>
+  {% for item in orden_compra.items.all %}
+    <li>
+      <strong>Producto:</strong> {{ item.producto.nombre }}<br>
+      <strong>Cantidad:</strong> {{ item.cantidad }}<br>
+      <strong>Prioridad:</strong> {% if item.prioridad %}Sí{% else %}No{% endif %}
+    </li>
+  {% endfor %}
+</ul>
+
+<!-- Botón para modificar prioridad -->
+<a href="{% url 'modificar_prioridad' orden_compra.pk %}" class="btn btn-primary">Modificar Prioridad</a>
+  
+<!-- Botón para volver a la lista de órdenes de compra -->
+<a href="{% url 'lista_ordenes_compra' %}" class="btn btn-secondary">Volver a la Lista de Órdenes</a>
+{% endblock %}

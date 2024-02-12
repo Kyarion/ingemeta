@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Listado de Órdenes de Compra</h1>
+  <ul>
+    {% for orden_compra in ordenes_compra %}
+      <li><a href="{% url 'detalle_orden_compra' orden_compra.pk %}">{{ orden_compra.numero_orden }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

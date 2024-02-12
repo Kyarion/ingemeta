@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fin Cambio de Rollo</title>
+</head>
+<body>
+    <h1>Fin Cambio de Rollo</h1>
+    {% if produccion_en_curso %}
+        <div class="alert alert-warning" role="alert">
+            Hay una producción en curso del tipo <strong>{{ produccion_en_curso.get_tipo_display }}</strong> iniciada el {{ produccion_en_curso.fecha_pedido }} a las {{ produccion_en_curso.hora_inicio|time:"H:i" }}.
+        </div>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">Fin Cambio de Rollo</button>
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+  <h1>Producción</h1>
+  <div class="tipos-produccion">
+    <a href="{% url 'inicio_cambio_rollo' %}" class="tipo-produccion">Cambio de Rollo</a>
+    <a href="{% url 'despacho' %}" class="tipo-produccion">Despacho</a>
+    <a href="{% url 'ingreso_material' %}" class="tipo-produccion">Ingreso de Material</a>
+    <a href="{% url 'setup_ajustes_lista' %}" class="tipo-produccion">Setup o Ajustes</a>
+    <a href="{% url 'pana_mantencion' %}" class="tipo-produccion">Pana o Mantención</a>
+    <a href="{% url 'produccion_iniciar' %}" class="tipo-produccion">Producción</a>
+  </div>
+{% endblock %}
