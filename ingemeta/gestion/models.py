@@ -43,10 +43,10 @@ class Produccion(models.Model):
         super(Produccion, self).save(*args, **kwargs)
 
 class Producto(models.Model):
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=100, unique=True)
     precio = models.IntegerField()
     cantidad_en_stock = models.IntegerField(default=0)
-    codigo_producto = models.CharField(max_length=50, unique=True)
+    codigo_producto = models.CharField(max_length=50)
     fecha_modificacion = models.DateField(auto_now=True)
     ancho = models.IntegerField(default=0)
     alto = models.IntegerField(default=0)

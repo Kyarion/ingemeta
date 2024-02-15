@@ -101,8 +101,57 @@ def lista_ordenes_compra(request):
 
 def produccion(request):
     return render(request, 'produccion.html')
+        
+def fin_produccion(request):
+    # Obtener la última producción en curso
+    produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
 
-def inicio_cambio_rollo(request):
+    if request.method == 'POST':
+        # Actualizar la hora de término
+        produccion_en_curso.hora_termino = timezone.now()
+        # Marcar la producción como finalizada
+        produccion_en_curso.en_curso = False
+
+        if produccion_en_curso.tipo == 'cambio_rollo':
+            # Obtener el ID del producto seleccionado del formulario
+            producto_id = request.POST.get('producto_rollo')
+            # Obtener el objeto del producto seleccionado
+            producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
+            # Decrementar el stock del producto seleccionado en 1
+            producto_seleccionado.cantidad_en_stock -= 1
+            producto_seleccionado.save()  # Guardar los cambios en el stock del producto
+
+        elif produccion_en_curso.tipo == 'despacho':
+            orden_form = forms.OrdenCompraForm(request.POST)
+            item_formset = forms.StockFormSet(request.POST)
+            # Crear una instancia del formulario de despacho con los datos del POST
+            form_despacho = forms.DespachoForm(request.POST)
+            if form_despacho.is_valid() and orden_form.is_valid() and item_formset.is_valid():
+                # Guardar la opción seleccionada en el campo de notas
+                produccion_en_curso.nota = form_despacho.cleaned_data['opcion_despacho']
+                orden = orden_form.save()
+                for form in item_formset:
+                    item_orden = form.save(commit=False)
+                item_orden.save()
+        produccion_en_curso.save()
+        return redirect('produccion')
+    else:
+        if produccion_en_curso.tipo == 'cambio_rollo':
+            # Obtener todos los productos tipo 'rollos'
+            productos_rollo = models.Producto.objects.filter(codigo_producto='rollos')
+            # Renderizar el formulario con los productos de tipo 'rollos'
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos_rollo': productos_rollo})
+        elif produccion_en_curso.tipo == 'despacho':
+            #Filtramos cadenas y pilares
+            productos_pilares_cadenas = models.Producto.objects.filter(codigo_producto__in=['pilares', 'cadenas'])
+            # Renderizar el formulario de despacho
+            form_despacho = forms.DespachoForm()
+            item_formset = forms.StockFormSet()
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'item_formset': item_formset, 'productos_pilares_cadenas': productos_pilares_cadenas})
+        # Eliminamos el else final y lo reemplazamos con un bloque condicional
+    return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
+
+def cambio_rollo(request):
     if models.Produccion.objects.filter(en_curso=True).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
@@ -114,23 +163,32 @@ def inicio_cambio_rollo(request):
             hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
         )
         return redirect('fin_produccion')
-
-def fin_produccion(request):
-    # Obtener la última producción en curso
-    produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
     
-    if request.method == 'POST':
-        # Actualizar la hora de término
-        produccion_en_curso.hora_termino = timezone.now()
-        # Marcar la producción como finalizada
-        produccion_en_curso.en_curso = False
-        produccion_en_curso.save()
-        return redirect('produccion')
+def despacho(request):
+    if models.Produccion.objects.filter(en_curso=True).exists():
+        # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
+        return redirect('fin_produccion')
     else:
-        return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
+        # Si no hay una producción en curso, crear una nueva
+        produccion = models.Produccion.objects.create(
+            tipo='despacho',
+            hora_inicio=timezone.now(),
+            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+        )
+        return redirect('fin_produccion')
 
 def ingreso_material(request):
-    return render(request, 'produccion.html')
+    if models.Produccion.objects.filter(en_curso=True).exists():
+        # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
+        return redirect('fin_produccion')
+    else:
+        # Si no hay una producción en curso, crear una nueva
+        produccion = models.Produccion.objects.create(
+            tipo='ingreso_material',
+            hora_inicio=timezone.now(),
+            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+        )
+        return redirect('fin_produccion')
 
 def setup_ajustes_lista(request):
     return render(request, 'produccion.html')
@@ -139,7 +197,4 @@ def pana_mantencion(request):
     return render(request, 'produccion.html')
 
 def produccion_iniciar(request):
-    return render(request, 'produccion.html')
-
-def despacho(request):
     return render(request, 'produccion.html')

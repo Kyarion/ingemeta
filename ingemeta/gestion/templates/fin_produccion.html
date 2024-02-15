@@ -3,19 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fin Cambio de Rollo</title>
+    <title>{{ produccion_en_curso.get_tipo_display }}</title>
 </head>
 <body>
-    <h1>Fin Cambio de Rollo</h1>
-    {% if produccion_en_curso %}
-        <div class="alert alert-warning" role="alert">
-            Hay una producción en curso del tipo <strong>{{ produccion_en_curso.get_tipo_display }}</strong> iniciada el {{ produccion_en_curso.fecha_pedido }} a las {{ produccion_en_curso.hora_inicio|time:"H:i" }}.
+    <h1>{{ produccion_en_curso.get_tipo_display }}</h1>
+    <div class="alert alert-warning" role="alert">
+        Hay una producción en curso del tipo <strong>{{ produccion_en_curso.get_tipo_display }}</strong> iniciada el {{ produccion_en_curso.fecha_pedido }} a las {{ produccion_en_curso.hora_inicio|time:"H:i" }}.
+    </div>
+    {% if produccion_en_curso.tipo == 'cambio_rollo' %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="producto_rollo">Selecciona un rollo:</label>
+            <select id="producto_rollo" name="producto_rollo">
+                {% for producto in productos_rollo %}
+                    <option value="{{ producto.id }}">{{ producto.nombre }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Finalizar Cambio de Rollo</button>
+        </form>
+    {% elif produccion_en_curso.tipo == 'despacho' %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="opcion_despacho">Seleccione una opción de despacho:</label>
+            <select id="opcion_despacho" name="opcion_despacho">
+                <option value="camion">Camión</option>
+                <option value="rampla">Rampla</option>
+            </select>
+            <button type="submit">Finalizar Despacho</button>
+        </form>
+
+        <fieldset>
+            <legend>Ítems de Orden</legend>
+            {{ item_formset.management_form }}
+            <div id="formset-container">
+                <!-- Renderizar los formularios iniciales -->
+                {% for form in item_formset %}
+                    <div class="item-form">
+                        <label for="{{ form.nombre.id_for_label }}">Nombre:</label>
+                        <select name="nombre" class="form-control">
+                            {% for producto in productos_pilares_cadenas %}
+                                <option value="{{ producto.nombre }}">{{ producto.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="{{ form.cantidad_despachada.id_for_label }}">Cantidad despachada:</label>
+                        {{ form.cantidad_despachada }}
+                        {% if not forloop.first %}
+                            <button type="button" class="eliminar-producto">Eliminar</button>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="button" id="agregar_producto">Agregar Producto</button>
+            <button type="button" id="eliminar_ultimo_producto">Eliminar Último Producto</button>
+        </fieldset>
+
+        <!-- Plantilla para el nuevo formulario de ítem -->
+        <div id="empty_form" style="display: none;">
+            <div class="item-form">{{ item_formset.empty_form }}</div>
         </div>
+
     {% endif %}
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit">Fin Cambio de Rollo</button>
-    </form>
+    {% if produccion_en_curso.tipo == 'despacho' %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var agregarProductoBtn = document.getElementById('agregar_producto');
+            var eliminarUltimoProductoBtn = document.getElementById('eliminar_ultimo_producto');
+            var formsetContainer = document.getElementById('formset-container');
+            var emptyFormTemplate = document.getElementById('empty_form').innerHTML;
+            var formCount = parseInt("{{ item_formset.total_form_count }}");
+    
+            agregarProductoBtn.addEventListener('click', function() {
+                var newForm = document.createElement('div');
+                newForm.classList.add('item-form');
+                newForm.innerHTML = emptyFormTemplate.replace(/__prefix__/g, formCount);
+                formsetContainer.appendChild(newForm);
+                formCount++;
+    
+                // Actualizar el atributo 'total_form' del formset
+                document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+            });
+    
+            eliminarUltimoProductoBtn.addEventListener('click', function() {
+                if (formsetContainer.children.length > 0) {
+                    formsetContainer.removeChild(formsetContainer.lastElementChild);
+                    formCount--;
+                    // Actualizar el atributo 'total_form' del formset
+                    document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+                }
+            });
+        });
+    </script>
+    {% endif %}
 </body>
 </html>
-
