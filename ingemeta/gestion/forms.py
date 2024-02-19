@@ -53,5 +53,3 @@ class StockForm(forms.ModelForm):
         widgets = {
             'nombre': forms.Select(attrs={'class': 'form-control'}),
         }
-
-StockFormSet = formset_factory(StockForm)
