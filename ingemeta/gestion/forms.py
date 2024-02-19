@@ -43,13 +43,11 @@ class DespachoForm(forms.Form):
     ]
     opcion_despacho = forms.ChoiceField(choices=opciones_despacho, label='Seleccione una opción de despacho')
 
-class StockForm(forms.ModelForm):
-    # Cambia el nombre del campo 'cantidad_en_stock' a 'cantidad_despachada'
-    cantidad_despachada = forms.IntegerField(label='Cantidad despachada', widget=forms.NumberInput(attrs={'class': 'form-control'}))
-
+class CambioStockForm(forms.ModelForm):
     class Meta:
-        model = models.Producto
-        fields = ['nombre', 'cantidad_despachada']  # Actualiza el nombre del campo aquí también
+        model = models.ItemOrden
+        fields = ['producto', 'cantidad']
         widgets = {
-            'nombre': forms.Select(attrs={'class': 'form-control'}),
+            'producto': forms.Select(attrs={'class': 'form-control'}),
+            'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
         }

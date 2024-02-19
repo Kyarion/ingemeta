@@ -103,7 +103,6 @@ def produccion(request):
         
 def fin_produccion(request):
     produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
-    StockFormSet = formset_factory(forms.StockForm)
 
     if request.method == 'POST':
         produccion_en_curso.hora_termino = timezone.now()
@@ -117,35 +116,28 @@ def fin_produccion(request):
 
         elif produccion_en_curso.tipo == 'despacho':
             form_despacho = forms.DespachoForm(request.POST)
-            item_formset = StockFormSet(request.POST)
-            if form_despacho.is_valid() and item_formset.is_valid():
+            form_stock = forms.CambioStockForm(request.POST)
+            if form_despacho.is_valid() and form_stock.is_valid():
                 produccion_en_curso.nota = form_despacho.cleaned_data['opcion_despacho']
-                for form in item_formset:
-                    item_orden = form.save(commit=False)
-                    print("Nombre del producto:", form.cleaned_data.get('nombre'))
-                    print("Cantidad despachada:", form.cleaned_data.get('cantidad_despachada'))
-                    nombre_producto = form.cleaned_data.get('nombre')
-                cantidad_despachada = form.cleaned_data.get('cantidad_despachada')
-                producto = models.Producto.objects.get(nombre=nombre_producto)
-                producto.cantidad_en_stock -= cantidad_despachada
-                producto.save()
-                item_orden.save()
-            else:
-                print("Errores en el formset:", item_formset.is_valid())
-                for form in item_formset:
-                    print(f"Errores en el formulario {form.prefix}:")
-                    print(form.errors)
-                produccion_en_curso.save()
+                #agregar codigo procesar form_stock
+                producto = form_stock.cleaned_data['producto']
+                cantidad = form_stock.cleaned_data['cantidad']
+
+                # Obtener el producto seleccionado
+                producto_seleccionado = get_object_or_404(models.Producto, pk=producto.pk)
+
+                # Actualizar la cantidad de stock del producto
+                producto_seleccionado.cantidad_en_stock -= cantidad
+                producto_seleccionado.save()
         return redirect('produccion')
     else:
         if produccion_en_curso.tipo == 'cambio_rollo':
             productos_rollo = models.Producto.objects.filter(codigo_producto='rollos')
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos_rollo': productos_rollo})
         elif produccion_en_curso.tipo == 'despacho':
-            productos_pilares_cadenas = models.Producto.objects.filter(codigo_producto__in=['pilares', 'cadenas'])
             form_despacho = forms.DespachoForm()
-            item_formset = StockFormSet()
-            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'item_formset': item_formset, 'productos_pilares_cadenas': productos_pilares_cadenas})
+            form_stock = forms.CambioStockForm()
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'form_stock': form_stock})
     return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
 
 def cambio_rollo(request):

@@ -74,3 +74,7 @@ class ItemOrden(models.Model):
     cantidad = models.IntegerField()
     cantidad_producida = models.IntegerField(default=0)
     prioridad = models.BooleanField(default=False)
+
+class CambioStock(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
