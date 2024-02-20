@@ -30,9 +30,6 @@
                 <option value="rampla">Rampla</option>
             </select>
 
-            <!-- Agregar campos de CambioStockForm -->
-            {{ form_stock.as_p }}
-
             <fieldset>
                 <legend>Ítems de Orden</legend>
                 {{ item_formset.management_form }}
@@ -40,64 +37,48 @@
                     <!-- Renderizar los formularios iniciales -->
                     {% for form in item_formset %}
                         <div class="item-form">
-                            <label for="{{ form.nombre.id_for_label }}">Nombre:</label>
-                            <select name="nombre" class="form-control">
-                                {% for producto in productos_pilares_cadenas %}
-                                    <option value="{{ producto.nombre }}">{{ producto.nombre }}</option>
-                                {% endfor %}
-                            </select>
-                            <label for="{{ form.cantidad_despachada.id_for_label }}">Cantidad despachada:</label>
-                            {{ form.cantidad_despachada }}
-                            {% if not forloop.first %}
-                                <button type="button" class="eliminar-producto">Eliminar</button>
-                            {% endif %}
+                            {{ form.as_p }}
                         </div>
                     {% endfor %}
                 </div>
                 <button type="button" id="agregar_producto">Agregar Producto</button>
                 <button type="button" id="eliminar_ultimo_producto">Eliminar Último Producto</button>
             </fieldset>
-
-            <!-- Plantilla para el nuevo formulario de ítem -->
-            <div id="empty_form" style="display: none;">
-                <div class="item-form">
-                    <label for="{{ item_formset.empty_form.nombre.id_for_label }}">Nombre:</label>
-                    <select name="nombre" class="form-control">
-                        {% for producto in productos_pilares_cadenas %}
-                            <option value="{{ producto.nombre }}">{{ producto.nombre }}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="{{ item_formset.empty_form.cantidad_despachada.id_for_label }}">Cantidad despachada:</label>
-                    {{ item_formset.empty_form.cantidad_despachada }}
-                </div>
-            </div>
-            
-            <button type="submit">Finalizar Despacho y Actualizar Stock</button>
+        
+            <button type="submit">Terminar despacho y actualizar stock</button>
         </form>
+
+        <!-- Plantilla para el nuevo formulario de ítem -->
+        <div id="empty_form" style="display: none;">
+            <div class="item-form">
+                {{ item_formset.empty_form.as_p }}
+            </div>
+        </div>
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var agregarProductoBtn = document.getElementById('agregar_producto');
-                var eliminarUltimoProductoBtn = document.getElementById('eliminar_ultimo_producto');
                 var formsetContainer = document.getElementById('formset-container');
                 var emptyFormTemplate = document.getElementById('empty_form').innerHTML;
-                var formCount = parseInt("{{ item_formset.total_form_count }}");
-        
+                var formCount = {{ item_formset.total_form_count }};
+
                 agregarProductoBtn.addEventListener('click', function() {
                     var newForm = document.createElement('div');
                     newForm.classList.add('item-form');
                     newForm.innerHTML = emptyFormTemplate.replace(/__prefix__/g, formCount);
                     formsetContainer.appendChild(newForm);
                     formCount++;
-        
+
                     // Actualizar el atributo 'total_form' del formset
                     document.getElementById('id_form-TOTAL_FORMS').value = formCount;
                 });
-        
-                eliminarUltimoProductoBtn.addEventListener('click', function() {
-                    if (formsetContainer.children.length > 0) {
-                        formsetContainer.removeChild(formsetContainer.lastElementChild);
+
+                // Event listener para eliminar un formulario de ítem
+                formsetContainer.addEventListener('click', function(event) {
+                    if (event.target && event.target.classList.contains('eliminar-producto')) {
+                        event.target.parentElement.remove();
                         formCount--;
+
                         // Actualizar el atributo 'total_form' del formset
                         document.getElementById('id_form-TOTAL_FORMS').value = formCount;
                     }
@@ -107,3 +88,5 @@
     {% endif %}
 </body>
 </html>
+
+

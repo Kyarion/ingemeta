@@ -103,6 +103,48 @@ def produccion(request):
         
 def fin_produccion(request):
     produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
+    ItemOrdenFormSet = formset_factory(forms.CambioStockForm)
+
+    if request.method == 'POST':
+        produccion_en_curso.hora_termino = timezone.now()
+        produccion_en_curso.en_curso = False
+
+        if produccion_en_curso.tipo == 'cambio_rollo':
+            producto_id = request.POST.get('producto_rollo')
+            producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
+            producto_seleccionado.cantidad_en_stock -= 1
+            producto_seleccionado.save()
+
+        elif produccion_en_curso.tipo == 'despacho':
+            form_despacho = forms.DespachoForm(request.POST)
+            item_formset = ItemOrdenFormSet(request.POST)
+            if form_despacho.is_valid() and item_formset.is_valid():
+                produccion_en_curso.nota = form_despacho.cleaned_data['opcion_despacho']
+                for form in item_formset:
+                    # Obtener los datos de cada formulario en el formset
+                    producto = form.cleaned_data['producto']
+                    cantidad = form.cleaned_data['cantidad']
+
+                    # Obtener el producto seleccionado
+                    producto_seleccionado = get_object_or_404(models.Producto, pk=producto.pk)
+
+                    # Actualizar la cantidad de stock del producto
+                    producto_seleccionado.cantidad_en_stock -= cantidad
+                    producto_seleccionado.save()
+
+        return redirect('produccion')
+    else:
+        if produccion_en_curso.tipo == 'cambio_rollo':
+            productos_rollo = models.Producto.objects.filter(codigo_producto='rollos')
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos_rollo': productos_rollo})
+        elif produccion_en_curso.tipo == 'despacho':
+            form_despacho = forms.DespachoForm()
+            item_formset = ItemOrdenFormSet()
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'item_formset': item_formset})
+    return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
+
+'''def fin_produccion(request):
+    produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
 
     if request.method == 'POST':
         produccion_en_curso.hora_termino = timezone.now()
@@ -138,7 +180,7 @@ def fin_produccion(request):
             form_despacho = forms.DespachoForm()
             form_stock = forms.CambioStockForm()
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'form_stock': form_stock})
-    return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
+    return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})'''
 
 def cambio_rollo(request):
     if models.Produccion.objects.filter(en_curso=True).exists():
