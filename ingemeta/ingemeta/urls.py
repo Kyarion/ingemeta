@@ -36,7 +36,7 @@ urlpatterns = [
     path('produccion/fin_produccion/', views.fin_produccion, name='fin_produccion'),
     path('despacho/', views.despacho, name='despacho'),
     path('ingreso-material/', views.ingreso_material, name='ingreso_material'),
-    path('setup-ajustes-lista/', views.setup_ajustes_lista, name='setup_ajustes_lista'),
+    path('setup-ajustes/', views.setup_ajustes, name='setup_ajustes'),
     path('pana-mantencion/', views.pana_mantencion, name='pana_mantencion'),
     path('produccion-iniciar/', views.produccion_iniciar, name='produccion_iniciar'),
 ]

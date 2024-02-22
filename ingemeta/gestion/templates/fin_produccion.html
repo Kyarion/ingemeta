@@ -10,6 +10,7 @@
     <div class="alert alert-warning" role="alert">
         Hay una producción en curso del tipo <strong>{{ produccion_en_curso.get_tipo_display }}</strong> iniciada el {{ produccion_en_curso.fecha_pedido }} a las {{ produccion_en_curso.hora_inicio|time:"H:i" }}.
     </div>
+    <!-- CAMBIO DE ROLLO -->
     {% if produccion_en_curso.tipo == 'cambio_rollo' %}
         <form method="post">
             {% csrf_token %}
@@ -21,6 +22,7 @@
             </select>
             <button type="submit">Finalizar Cambio de Rollo</button>
         </form>
+    <!-- DESPACHO -->
     {% elif produccion_en_curso.tipo == 'despacho' %}
         <form method="post">
             {% csrf_token %}
@@ -29,9 +31,7 @@
                 <option value="camion">Camión</option>
                 <option value="rampla">Rampla</option>
             </select>
-
             <fieldset>
-                <legend>Ítems de Orden</legend>
                 {{ item_formset.management_form }}
                 <div id="formset-container">
                     <!-- Renderizar los formularios iniciales -->
@@ -54,7 +54,6 @@
                 {{ item_formset.empty_form.as_p }}
             </div>
         </div>
-
         <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var agregarProductoBtn = document.getElementById('agregar_producto');
@@ -85,8 +84,32 @@
                 });
             });
         </script>
+
+    <!-- INGRESO DE MATERIAL -->
+    {% elif produccion_en_curso.tipo == 'ingreso_material' %}
+    <form method="post">
+        {% csrf_token %}
+        <fieldset>
+            <legend>Material de ingreso:</legend>
+            <ul>
+                {% for material in material_ingreso %}
+                    <li>{{ material.nombre }}: <input type="number" name="cantidad_{{ material.id }}" value="0" min="0"></li>
+                {% endfor %}
+            </ul>
+        </fieldset>
+        <button type="submit">Terminar ingreso de material y actualizar stock</button>
+    </form>
+    {% elif produccion_en_curso.tipo == 'setup_ajustes' %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="material_ajuste">Selecciona:</label>
+            <select id="material_ajuste" name="material_ajuste">
+                {% for producto in ajustes %}
+                    <option value="{{ producto.id }}">{{ producto.nombre }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit">Finalizar Setup o Ajuste</button>
+        </form>
     {% endif %}
 </body>
 </html>
-
-

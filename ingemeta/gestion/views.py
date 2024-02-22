@@ -103,21 +103,23 @@ def produccion(request):
         
 def fin_produccion(request):
     produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
-    ItemOrdenFormSet = formset_factory(forms.CambioStockForm)
+    StockFormSet = formset_factory(forms.CambioStockForm)
 
     if request.method == 'POST':
-        produccion_en_curso.hora_termino = timezone.now()
-        produccion_en_curso.en_curso = False
-
+        #POST para cambio de rollo
         if produccion_en_curso.tipo == 'cambio_rollo':
+            produccion_en_curso.hora_termino = timezone.now()
+            produccion_en_curso.en_curso = False
             producto_id = request.POST.get('producto_rollo')
             producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
             producto_seleccionado.cantidad_en_stock -= 1
             producto_seleccionado.save()
-
+        #POST para despacho
         elif produccion_en_curso.tipo == 'despacho':
+            produccion_en_curso.hora_termino = timezone.now()
+            produccion_en_curso.en_curso = False
             form_despacho = forms.DespachoForm(request.POST)
-            item_formset = ItemOrdenFormSet(request.POST)
+            item_formset = StockFormSet(request.POST)
             if form_despacho.is_valid() and item_formset.is_valid():
                 produccion_en_curso.nota = form_despacho.cleaned_data['opcion_despacho']
                 for form in item_formset:
@@ -131,7 +133,26 @@ def fin_produccion(request):
                     # Actualizar la cantidad de stock del producto
                     producto_seleccionado.cantidad_en_stock -= cantidad
                     producto_seleccionado.save()
-
+        #POST para ingreso de material
+        elif produccion_en_curso.tipo == 'ingreso_material':
+            produccion_en_curso.hora_termino = timezone.now()
+            produccion_en_curso.en_curso = False
+            material_ingreso = models.Producto.objects.filter(codigo_producto='rollos')
+            for material in material_ingreso:
+                cantidad = int(request.POST.get(f'cantidad_{material.id}', 0))
+                material.cantidad_en_stock += cantidad
+                material.save()
+        #POST para Setup o Ajustes
+        elif produccion_en_curso.tipo == 'setup_ajustes':
+            produccion_en_curso.hora_termino = timezone.now()
+            produccion_en_curso.en_curso = False
+            producto_id = request.POST.get('material_ajuste')
+            if producto_id:
+                producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
+                print(producto_seleccionado)
+                produccion_en_curso.nota = producto_seleccionado.nombre
+                produccion_en_curso.save()
+        produccion_en_curso.save()
         return redirect('produccion')
     else:
         if produccion_en_curso.tipo == 'cambio_rollo':
@@ -139,48 +160,15 @@ def fin_produccion(request):
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos_rollo': productos_rollo})
         elif produccion_en_curso.tipo == 'despacho':
             form_despacho = forms.DespachoForm()
-            item_formset = ItemOrdenFormSet()
+            item_formset = StockFormSet()
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'item_formset': item_formset})
-    return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
-
-'''def fin_produccion(request):
-    produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
-
-    if request.method == 'POST':
-        produccion_en_curso.hora_termino = timezone.now()
-        produccion_en_curso.en_curso = False
-
-        if produccion_en_curso.tipo == 'cambio_rollo':
-            producto_id = request.POST.get('producto_rollo')
-            producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
-            producto_seleccionado.cantidad_en_stock -= 1
-            producto_seleccionado.save()
-
-        elif produccion_en_curso.tipo == 'despacho':
-            form_despacho = forms.DespachoForm(request.POST)
-            form_stock = forms.CambioStockForm(request.POST)
-            if form_despacho.is_valid() and form_stock.is_valid():
-                produccion_en_curso.nota = form_despacho.cleaned_data['opcion_despacho']
-                #agregar codigo procesar form_stock
-                producto = form_stock.cleaned_data['producto']
-                cantidad = form_stock.cleaned_data['cantidad']
-
-                # Obtener el producto seleccionado
-                producto_seleccionado = get_object_or_404(models.Producto, pk=producto.pk)
-
-                # Actualizar la cantidad de stock del producto
-                producto_seleccionado.cantidad_en_stock -= cantidad
-                producto_seleccionado.save()
-        return redirect('produccion')
-    else:
-        if produccion_en_curso.tipo == 'cambio_rollo':
-            productos_rollo = models.Producto.objects.filter(codigo_producto='rollos')
-            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos_rollo': productos_rollo})
-        elif produccion_en_curso.tipo == 'despacho':
-            form_despacho = forms.DespachoForm()
-            form_stock = forms.CambioStockForm()
-            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'form_despacho': form_despacho, 'form_stock': form_stock})
-    return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})'''
+        elif produccion_en_curso.tipo == 'ingreso_material':
+            material_ingreso = models.Producto.objects.filter(codigo_producto='rollos')
+            item_formset = StockFormSet()
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'material_ingreso': material_ingreso, 'item_formset': item_formset})
+        elif produccion_en_curso.tipo == 'setup_ajustes':
+            ajustes = models.Producto.objects.filter(codigo_producto__in=['cadenas', 'pilares'])
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'ajustes': ajustes})
 
 def cambio_rollo(request):
     if models.Produccion.objects.filter(en_curso=True).exists():
@@ -221,8 +209,18 @@ def ingreso_material(request):
         )
         return redirect('fin_produccion')
 
-def setup_ajustes_lista(request):
-    return render(request, 'produccion.html')
+def setup_ajustes(request):
+    if models.Produccion.objects.filter(en_curso=True).exists():
+        # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
+        return redirect('fin_produccion')
+    else:
+        # Si no hay una producción en curso, crear una nueva
+        produccion = models.Produccion.objects.create(
+            tipo='setup_ajustes',
+            hora_inicio=timezone.now(),
+            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+        )
+        return redirect('fin_produccion')
 
 def pana_mantencion(request):
     return render(request, 'produccion.html')
