@@ -149,9 +149,13 @@ def fin_produccion(request):
             producto_id = request.POST.get('material_ajuste')
             if producto_id:
                 producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
-                print(producto_seleccionado)
                 produccion_en_curso.nota = producto_seleccionado.nombre
                 produccion_en_curso.save()
+        #POST para Pana o Mantencion
+        elif  produccion_en_curso.tipo == 'pana_mantencion':
+            produccion_en_curso.hora_termino = timezone.now()
+            produccion_en_curso.en_curso = False
+            produccion_en_curso.nota = request.POST.get('observaciones')
         produccion_en_curso.save()
         return redirect('produccion')
     else:
@@ -169,6 +173,8 @@ def fin_produccion(request):
         elif produccion_en_curso.tipo == 'setup_ajustes':
             ajustes = models.Producto.objects.filter(codigo_producto__in=['cadenas', 'pilares'])
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'ajustes': ajustes})
+        elif produccion_en_curso.tipo == 'pana_mantencion':
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
 
 def cambio_rollo(request):
     if models.Produccion.objects.filter(en_curso=True).exists():
@@ -223,7 +229,17 @@ def setup_ajustes(request):
         return redirect('fin_produccion')
 
 def pana_mantencion(request):
-    return render(request, 'produccion.html')
+    if models.Produccion.objects.filter(en_curso=True).exists():
+        # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
+        return redirect('fin_produccion')
+    else:
+        # Si no hay una producción en curso, crear una nueva
+        produccion = models.Produccion.objects.create(
+            tipo='pana_mantencion',
+            hora_inicio=timezone.now(),
+            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+        )
+        return redirect('fin_produccion')
 
 def produccion_iniciar(request):
     return render(request, 'produccion.html')
