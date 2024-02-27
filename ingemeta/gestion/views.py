@@ -156,6 +156,16 @@ def fin_produccion(request):
             produccion_en_curso.hora_termino = timezone.now()
             produccion_en_curso.en_curso = False
             produccion_en_curso.nota = request.POST.get('observaciones')
+        #POST para Produccion
+        elif produccion_en_curso.tipo == 'produccion':
+            produccion_en_curso.hora_termino = timezone.now()
+            produccion_en_curso.en_curso = False
+            producto_id = request.POST.get('produccion_actual')
+            cantidad = request.POST.get('cantidad')
+            if producto_id and cantidad:
+                producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
+                producto_seleccionado.cantidad_en_stock += int(cantidad)
+                producto_seleccionado.save()
         produccion_en_curso.save()
         return redirect('produccion')
     else:
@@ -175,6 +185,9 @@ def fin_produccion(request):
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'ajustes': ajustes})
         elif produccion_en_curso.tipo == 'pana_mantencion':
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso})
+        elif produccion_en_curso.tipo == 'produccion':
+            productos = models.Producto.objects.filter(codigo_producto__in=['cadenas', 'pilares'])
+            return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos': productos})
 
 def cambio_rollo(request):
     if models.Produccion.objects.filter(en_curso=True).exists():
@@ -242,4 +255,14 @@ def pana_mantencion(request):
         return redirect('fin_produccion')
 
 def produccion_iniciar(request):
-    return render(request, 'produccion.html')
+    if models.Produccion.objects.filter(en_curso=True).exists():
+        # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
+        return redirect('fin_produccion')
+    else:
+        # Si no hay una producción en curso, crear una nueva
+        produccion = models.Produccion.objects.create(
+            tipo='produccion',
+            hora_inicio=timezone.now(),
+            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+        )
+        return redirect('fin_produccion')

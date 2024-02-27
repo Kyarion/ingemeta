@@ -120,6 +120,21 @@
             <br>
             <button type="submit">Finalizar Setup o Ajuste</button>
         </form>
+    <!-- PRODUCCION -->
+    {% elif produccion_en_curso.tipo == 'produccion' %}
+    <form method="post">
+        {% csrf_token %}
+        <label for="produccion_actual">Selecciona:</label>
+            <select id="produccion_actual" name="produccion_actual">
+                {% for producto in productos %}
+                    <option value="{{ producto.id }}">{{ producto.nombre }}</option>
+                {% endfor %}
+            </select>
+            <ul>
+                <li>Cantidad Producida: <input type="number" name="cantidad" value="0" min="0"></li>
+            </ul>
+            <button type="submit">Finalizar Producción</button>
+    </form>
     {% endif %}
 </body>
 </html>
