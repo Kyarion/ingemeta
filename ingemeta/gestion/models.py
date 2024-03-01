@@ -78,3 +78,4 @@ class ItemOrden(models.Model):
 class CambioStock(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
+
