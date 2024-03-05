@@ -74,8 +74,21 @@ class ItemOrden(models.Model):
     cantidad = models.IntegerField()
     cantidad_producida = models.IntegerField(default=0)
     prioridad = models.BooleanField(default=False)
+    revisado = models.BooleanField(default=False)
 
 class CambioStock(models.Model):
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
+
+class OrdenProduccion(models.Model):
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
+    cantidad = models.IntegerField()
+    numero_secuencia = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['numero_secuencia', '-cantidad']  # Ordena por cantidad de forma predeterminada
+
+# orden_produccion_queryset = OrdenProduccion.objects.order_by('numero_secuencia') usar este codigo para el orden manual
+# orden_produccion_queryset = OrdenProduccion.objects.all() usar este codigo para el orden por cantidad
+
 

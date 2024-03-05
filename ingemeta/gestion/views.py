@@ -266,3 +266,16 @@ def produccion_iniciar(request):
             hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
         )
         return redirect('fin_produccion')
+    
+def verificar_orden_produccion(request):
+    # Obtener los productos 'pilares' y 'cadenas'
+    productos_pilares_cadenas = models.Producto.objects.filter(codigo_producto__in=['pilares', 'cadenas'])
+    # Verificar si los productos 'pilares' y 'cadenas' están en el modelo OrdenProduccion
+    for producto in productos_pilares_cadenas:
+        if not models.OrdenProduccion.objects.filter(producto=producto).exists():
+            models.OrdenProduccion.objects.create(producto=producto, cantidad=1, numero_secuencia=1)
+    # Actualizamos los valores de cantidad segun ItemOrden
+        return('orden_produccion')
+    
+def orden_produccion(request):
+    return('orden_produccion.html')
