@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orden de Producción</title>
+</head>
+<body>
+    <h1>Orden de Producción</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ item_formset.management_form }}
+        <table>
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Número de Secuencia</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in orden_produccion_queryset %}
+                <tr>
+                    <td>{{ item.producto }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>
+                        <input type="number" name="form-{{ forloop.counter0 }}-numero_secuencia" value="{{ item.numero_secuencia }}" class="form-control">
+                    </td>
+                    <input type="hidden" name="form-{{ forloop.counter0 }}-producto" value="{{ item.producto.id }}">
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+        <button type="submit">Guardar Cambios</button>
+    </form>
+</body>
+{% endblock %}

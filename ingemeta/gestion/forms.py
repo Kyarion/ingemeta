@@ -51,3 +51,12 @@ class CambioStockForm(forms.ModelForm):
             'producto': forms.Select(attrs={'class': 'form-control'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
         }
+
+class OrdenProduccionForm(forms.ModelForm):
+    class Meta:
+        model = models.OrdenProduccion
+        fields = ['numero_secuencia', 'producto']
+        widgets = {
+            'numero_secuencia': forms.NumberInput(attrs={'class': 'form-control'}),
+            'producto': forms.HiddenInput(),  # El producto se pasa por el constructor del formulario
+        }

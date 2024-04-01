@@ -70,6 +70,19 @@ def crear_orden_compra(request):
     
 def detalle_orden_compra(request, pk):
     orden_compra = get_object_or_404(models.OrdenCompra, pk=pk)
+    productos_pilares_cadenas = models.Producto.objects.filter(codigo_producto__in=['pilares', 'cadenas']) 
+    # Verificar si los productos 'pilares' y 'cadenas' están en el modelo OrdenProduccion 
+    for producto in productos_pilares_cadenas: 
+        if not models.OrdenProduccion.objects.filter(producto=producto).exists(): 
+            models.OrdenProduccion.objects.create(producto=producto, cantidad=0, numero_secuencia=1) 
+        # Actualizamos los valores de cantidad segun ItemOrden 
+        productos_orden = models.ItemOrden.objects.filter(revisado=False) 
+        for producto in productos_orden: 
+            producto_seleccionado = get_object_or_404(models.OrdenProduccion, producto=producto.producto) 
+            producto_seleccionado.cantidad += producto.cantidad 
+            producto.revisado = True 
+            producto.save() 
+            producto_seleccionado.save() 
     return render(request, 'detalle_orden_compra.html', {'orden_compra': orden_compra})
 
 def modificar_prioridad(request, pk):
@@ -267,15 +280,30 @@ def produccion_iniciar(request):
         )
         return redirect('fin_produccion')
     
-def verificar_orden_produccion(request):
-    # Obtener los productos 'pilares' y 'cadenas'
-    productos_pilares_cadenas = models.Producto.objects.filter(codigo_producto__in=['pilares', 'cadenas'])
-    # Verificar si los productos 'pilares' y 'cadenas' están en el modelo OrdenProduccion
-    for producto in productos_pilares_cadenas:
-        if not models.OrdenProduccion.objects.filter(producto=producto).exists():
-            models.OrdenProduccion.objects.create(producto=producto, cantidad=1, numero_secuencia=1)
-    # Actualizamos los valores de cantidad segun ItemOrden
-        return('orden_produccion')
-    
 def orden_produccion(request):
-    return('orden_produccion.html')
+    if request.method == 'POST':
+            return HttpResponse("Formulario inválido")
+    else:
+        orden_produccion_queryset = models.OrdenProduccion.objects.order_by('numero_secuencia', '-cantidad')
+        return render(request, 'orden_produccion.html', {'orden_produccion_queryset': orden_produccion_queryset})
+
+def modificar_orden_produccion(request):
+    OrdenProduccionFormSet = formset_factory(forms.OrdenProduccionForm)
+    if request.method == 'POST':
+        formset = OrdenProduccionFormSet(request.POST)
+        if formset.is_valid():
+            for form in formset:
+                numero_secuencia = form.cleaned_data['numero_secuencia']
+                producto_id = form.cleaned_data['producto']
+                # Actualizar el número de secuencia en el objeto de OrdenProduccion
+                orden_produccion_obj = models.OrdenProduccion.objects.get(pk=producto_id)
+                orden_produccion_obj.numero_secuencia = numero_secuencia
+                orden_produccion_obj.save()
+            return redirect('orden_produccion')
+        else:
+            print(formset)
+            return HttpResponse("Formulario inválido")
+    else:
+        orden_produccion_queryset = models.OrdenProduccion.objects.order_by('numero_secuencia', '-cantidad')
+        item_formset = OrdenProduccionFormSet()
+        return render(request, 'orden_produccion.html', {'item_formset': item_formset, 'orden_produccion_queryset': orden_produccion_queryset})
