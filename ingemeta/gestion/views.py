@@ -174,10 +174,13 @@ def fin_produccion(request):
             produccion_en_curso.hora_termino = timezone.now()
             produccion_en_curso.en_curso = False
             producto_id = request.POST.get('produccion_actual')
-            cantidad = request.POST.get('cantidad')
-            if producto_id and cantidad:
+            cantid = request.POST.get('cantidad')
+            if producto_id and cantid:
                 producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
-                producto_seleccionado.cantidad_en_stock += int(cantidad)
+                producto_seleccionado2 = get_object_or_404(models.OrdenProduccion, pk=producto_id)
+                producto_seleccionado.cantidad_en_stock += int(cantid)
+                producto_seleccionado2.cantidad -= int(cantid)
+                producto_seleccionado2.save()
                 producto_seleccionado.save()
         produccion_en_curso.save()
         return redirect('produccion')
@@ -288,22 +291,22 @@ def orden_produccion(request):
         return render(request, 'orden_produccion.html', {'orden_produccion_queryset': orden_produccion_queryset})
 
 def modificar_orden_produccion(request):
-    OrdenProduccionFormSet = formset_factory(forms.OrdenProduccionForm)
     if request.method == 'POST':
-        formset = OrdenProduccionFormSet(request.POST)
-        if formset.is_valid():
-            for form in formset:
-                numero_secuencia = form.cleaned_data['numero_secuencia']
-                producto_id = form.cleaned_data['producto']
-                # Actualizar el número de secuencia en el objeto de OrdenProduccion
-                orden_produccion_obj = models.OrdenProduccion.objects.get(pk=producto_id)
-                orden_produccion_obj.numero_secuencia = numero_secuencia
-                orden_produccion_obj.save()
-            return redirect('orden_produccion')
-        else:
-            print(formset)
-            return HttpResponse("Formulario inválido")
-    else:
-        orden_produccion_queryset = models.OrdenProduccion.objects.order_by('numero_secuencia', '-cantidad')
-        item_formset = OrdenProduccionFormSet()
-        return render(request, 'orden_produccion.html', {'item_formset': item_formset, 'orden_produccion_queryset': orden_produccion_queryset})
+        # Procesar la actualización de las prioridades
+        for orden_id, nueva_prioridad in request.POST.items():
+            if orden_id.startswith('prioridad_'):
+                orden_id = orden_id.split('_')[1]
+                try:
+                    orden = models.OrdenProduccion.objects.get(pk=orden_id)
+                    orden.numero_secuencia = int(nueva_prioridad)
+                    orden.save()
+                except models.OrdenProduccion.DoesNotExist:
+                    return HttpResponse('Orden de Producción no encontrada', status=404)
+        return redirect('orden_produccion')
+
+    # Solicitud GET, mostrar la lista de órdenes de producción con cantidad > 0
+    ordenes_produccion = models.OrdenProduccion.objects.filter(cantidad__gt=0).order_by('numero_secuencia')
+    context = {
+        'ordenes_produccion': ordenes_produccion
+    }
+    return render(request, 'modificar_orden_produccion.html', context)
