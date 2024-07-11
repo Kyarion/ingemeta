@@ -39,4 +39,6 @@ urlpatterns = [
     path('setup-ajustes/', views.setup_ajustes, name='setup_ajustes'),
     path('pana-mantencion/', views.pana_mantencion, name='pana_mantencion'),
     path('produccion-iniciar/', views.produccion_iniciar, name='produccion_iniciar'),
+    path('orden_produccion/', views.orden_produccion, name='orden_produccion'),
+    path('orden_produccion/modificar', views.modificar_orden_produccion, name='modificar_orden_produccion'),
 ]

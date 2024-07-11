@@ -70,6 +70,19 @@ def crear_orden_compra(request):
     
 def detalle_orden_compra(request, pk):
     orden_compra = get_object_or_404(models.OrdenCompra, pk=pk)
+    productos_pilares_cadenas = models.Producto.objects.filter(codigo_producto__in=['pilares', 'cadenas']) 
+    # Verificar si los productos 'pilares' y 'cadenas' están en el modelo OrdenProduccion 
+    for producto in productos_pilares_cadenas: 
+        if not models.OrdenProduccion.objects.filter(producto=producto).exists(): 
+            models.OrdenProduccion.objects.create(producto=producto, cantidad=0, numero_secuencia=1) 
+        # Actualizamos los valores de cantidad segun ItemOrden 
+        productos_orden = models.ItemOrden.objects.filter(revisado=False) 
+        for producto in productos_orden: 
+            producto_seleccionado = get_object_or_404(models.OrdenProduccion, producto=producto.producto) 
+            producto_seleccionado.cantidad += producto.cantidad 
+            producto.revisado = True 
+            producto.save() 
+            producto_seleccionado.save() 
     return render(request, 'detalle_orden_compra.html', {'orden_compra': orden_compra})
 
 def modificar_prioridad(request, pk):
@@ -161,10 +174,13 @@ def fin_produccion(request):
             produccion_en_curso.hora_termino = timezone.now()
             produccion_en_curso.en_curso = False
             producto_id = request.POST.get('produccion_actual')
-            cantidad = request.POST.get('cantidad')
-            if producto_id and cantidad:
+            cantid = request.POST.get('cantidad')
+            if producto_id and cantid:
                 producto_seleccionado = get_object_or_404(models.Producto, pk=producto_id)
-                producto_seleccionado.cantidad_en_stock += int(cantidad)
+                producto_seleccionado2 = get_object_or_404(models.OrdenProduccion, pk=producto_id)
+                producto_seleccionado.cantidad_en_stock += int(cantid)
+                producto_seleccionado2.cantidad -= int(cantid)
+                producto_seleccionado2.save()
                 producto_seleccionado.save()
         produccion_en_curso.save()
         return redirect('produccion')
@@ -266,3 +282,31 @@ def produccion_iniciar(request):
             hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
         )
         return redirect('fin_produccion')
+    
+def orden_produccion(request):
+    if request.method == 'POST':
+            return HttpResponse("Formulario inválido")
+    else:
+        orden_produccion_queryset = models.OrdenProduccion.objects.order_by('numero_secuencia', '-cantidad')
+        return render(request, 'orden_produccion.html', {'orden_produccion_queryset': orden_produccion_queryset})
+
+def modificar_orden_produccion(request):
+    if request.method == 'POST':
+        # Procesar la actualización de las prioridades
+        for orden_id, nueva_prioridad in request.POST.items():
+            if orden_id.startswith('prioridad_'):
+                orden_id = orden_id.split('_')[1]
+                try:
+                    orden = models.OrdenProduccion.objects.get(pk=orden_id)
+                    orden.numero_secuencia = int(nueva_prioridad)
+                    orden.save()
+                except models.OrdenProduccion.DoesNotExist:
+                    return HttpResponse('Orden de Producción no encontrada', status=404)
+        return redirect('orden_produccion')
+
+    # Solicitud GET, mostrar la lista de órdenes de producción con cantidad > 0
+    ordenes_produccion = models.OrdenProduccion.objects.filter(cantidad__gt=0).order_by('numero_secuencia')
+    context = {
+        'ordenes_produccion': ordenes_produccion
+    }
+    return render(request, 'modificar_orden_produccion.html', context)

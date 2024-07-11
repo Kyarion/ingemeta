@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modificar Orden de Producción</title>
+</head>
+<body>
+    <h1>Modificar Orden de Producción</h1>
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Nombre de Producto</th>
+                    <th>Cantidad a Producir</th>
+                    <th>Descripción Prioridad Actual</th>
+                    <th>Nueva Prioridad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for orden in ordenes_produccion %}
+                <tr>
+                    <td>{{ orden.producto }}</td>
+                    <td>{{ orden.cantidad }}</td>
+                    <td>{{ orden.numero_secuencia }}</td>
+                    <td>
+                        <input type="number" name="prioridad_{{ orden.id }}" value="{{ orden.numero_secuencia }}" required>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit">Actualizar Prioridades</button>
+    </form>
+</body>
+</html>

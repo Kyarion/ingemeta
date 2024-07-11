@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>Listado de Órdenes de Producción</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Número de secuencia</th>
+        <th>Cantidad</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for orden in orden_produccion_queryset %}
+        {%if orden.cantidad != 0 %}
+            <tr>
+            <td>{{ orden.producto.nombre }}</td>
+            <td>{{ orden.numero_secuencia }}</td>
+            <td>{{ orden.cantidad }}</td>
+            </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+  <a href="{% url 'modificar_orden_produccion' %}" class="btn btn-primary">Modificar orden de producción</a>
+{% endblock %}
