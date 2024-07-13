@@ -20,11 +20,10 @@ class OrdenCompraForm(forms.ModelForm):
 class ItemOrdenForm(forms.ModelForm):
     class Meta:
         model = models.ItemOrden
-        fields = ['producto', 'cantidad', 'prioridad']
+        fields = ['producto', 'cantidad']
         widgets = {
             'producto': forms.Select(attrs={'class': 'form-control'}),
             'cantidad': forms.NumberInput(attrs={'class': 'form-control'}),
-            'prioridad': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 class ModificarPrioridadForm(forms.Form):

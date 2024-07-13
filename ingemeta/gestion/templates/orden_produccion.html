@@ -22,5 +22,7 @@
       {% endfor %}
     </tbody>
   </table>
+  {% if user.is_staff %}
   <a href="{% url 'modificar_orden_produccion' %}" class="btn btn-primary">Modificar orden de producción</a>
-{% endblock %}
+  {% endif %}
+  {% endblock %}

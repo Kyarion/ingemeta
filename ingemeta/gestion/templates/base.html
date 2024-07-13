@@ -21,19 +21,24 @@
               <a class="nav-link active" aria-current="page" href="/home">Home</a>
             </li>
               {% if user.is_authenticated %}
-                  <li class="nav-item">
-                      <a class="nav-link" href="/crear-orden-compra">Crear Órden de Compra</a>                    
-                  </li>
-                {% endif %}
-             <li class="nav-item">
-              <a class="nav-link" href="/orden-compra">Órdenes de Compra</a>
-            </li>
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="/produccion">Producción</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="/orden_produccion">Órden Producción</a>
             </li>
+            {% endif %}
+            {% if user.is_staff %}
+              <li class="nav-item">
+                <a class="nav-link" href="/crear-orden-compra">Crear Órden de Compra</a>                    
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/orden-compra">Órdenes de Compra</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" aria-current="page" href="/admin">Admin</a>
+              </li>
+            {%endif%}
           </ul>  
            {% if user.is_authenticated %}
             <a class="cerrar-sesion" href="{% url 'logout' %}">Cerrar sesión</a>

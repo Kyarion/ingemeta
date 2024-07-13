@@ -16,13 +16,6 @@
                 <div class="item-form">
                     {{ form.producto }}
                     {{ form.cantidad }}
-                    {% if forloop.first %}
-                        <label for="{{ form.prioridad.id_for_label }}">Prioridad:</label>
-                        {{ form.prioridad }}
-                    {% endif %}
-                    {% if not forloop.first %}
-                        <button type="button" class="eliminar-producto">Eliminar</button>
-                    {% endif %}
                 </div>
             {% endfor %}
         </div>

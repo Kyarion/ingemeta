@@ -115,7 +115,7 @@ def produccion(request):
     return render(request, 'produccion.html')
         
 def fin_produccion(request):
-    produccion_en_curso = models.Produccion.objects.filter(en_curso=True).last()
+    produccion_en_curso = models.Produccion.objects.filter(en_curso=True, usuario=request.user).last()
     StockFormSet = formset_factory(forms.CambioStockForm)
 
     if request.method == 'POST':
@@ -271,7 +271,7 @@ def pana_mantencion(request):
         return redirect('fin_produccion')
 
 def produccion_iniciar(request):
-    if models.Produccion.objects.filter(en_curso=True).exists():
+    if models.Produccion.objects.filter(en_curso=True, usuario=request.user).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
     else:
@@ -279,7 +279,8 @@ def produccion_iniciar(request):
         produccion = models.Produccion.objects.create(
             tipo='produccion',
             hora_inicio=timezone.now(),
-            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+            hora_termino=timezone.now(),  # Se actualiza automáticamente al guardar
+            usuario=request.user
         )
         return redirect('fin_produccion')
     

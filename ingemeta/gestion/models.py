@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 # Create your models here.
 """
@@ -30,12 +31,13 @@ class Produccion(models.Model):
 
     nombre_producto = models.CharField(max_length=30)
     fecha_pedido = models.DateField(auto_now_add=True)
-    hora_inicio = models.TimeField(timezone.now())
-    hora_termino = models.TimeField(timezone.now())
+    hora_inicio = models.TimeField()
+    hora_termino = models.TimeField()
     tipo = models.CharField(max_length=30, choices=TIPOS_CHOICES)
     cantidad = models.IntegerField(default=0)
     nota = models.TextField(blank=True)
     en_curso = models.BooleanField(default=False)  # Flag para indicar si la producción está en curso
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def save(self, *args, **kwargs):
         if not self.pk:  # Si es una nueva instancia
@@ -52,6 +54,7 @@ class Producto(models.Model):
     alto = models.IntegerField(default=0)
     largo = models.FloatField(default=0)
     diametro = models.FloatField(default=0)
+    peso = models.FloatField(default=0)
 
     def __str__(self):
         return self.nombre
