@@ -206,7 +206,7 @@ def fin_produccion(request):
             return render(request, 'fin_produccion.html', {'produccion_en_curso': produccion_en_curso, 'productos': productos})
 
 def cambio_rollo(request):
-    if models.Produccion.objects.filter(en_curso=True).exists():
+    if models.Produccion.objects.filter(en_curso=True, usuario=request.user).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
     else:
@@ -214,12 +214,13 @@ def cambio_rollo(request):
         produccion = models.Produccion.objects.create(
             tipo='cambio_rollo',
             hora_inicio=timezone.now(),
-            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+            hora_termino=timezone.now(),  # Se actualiza automáticamente al guardar
+            usuario=request.user
         )
         return redirect('fin_produccion')
     
 def despacho(request):
-    if models.Produccion.objects.filter(en_curso=True).exists():
+    if models.Produccion.objects.filter(en_curso=True, usuario=request.user).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
     else:
@@ -227,12 +228,13 @@ def despacho(request):
         produccion = models.Produccion.objects.create(
             tipo='despacho',
             hora_inicio=timezone.now(),
-            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+            hora_termino=timezone.now(),  # Se actualiza automáticamente al guardar
+            usuario=request.user
         )
         return redirect('fin_produccion')
 
 def ingreso_material(request):
-    if models.Produccion.objects.filter(en_curso=True).exists():
+    if models.Produccion.objects.filter(en_curso=True, usuario=request.user).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
     else:
@@ -240,12 +242,13 @@ def ingreso_material(request):
         produccion = models.Produccion.objects.create(
             tipo='ingreso_material',
             hora_inicio=timezone.now(),
-            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+            hora_termino=timezone.now(),  # Se actualiza automáticamente al guardar
+            usuario=request.user
         )
         return redirect('fin_produccion')
 
 def setup_ajustes(request):
-    if models.Produccion.objects.filter(en_curso=True).exists():
+    if models.Produccion.objects.filter(en_curso=True, usuario=request.user).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
     else:
@@ -253,12 +256,13 @@ def setup_ajustes(request):
         produccion = models.Produccion.objects.create(
             tipo='setup_ajustes',
             hora_inicio=timezone.now(),
-            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+            hora_termino=timezone.now(),  # Se actualiza automáticamente al guardar
+            usuario=request.user
         )
         return redirect('fin_produccion')
 
 def pana_mantencion(request):
-    if models.Produccion.objects.filter(en_curso=True).exists():
+    if models.Produccion.objects.filter(en_curso=True, usuario=request.user).exists():
         # Si hay una producción en curso, redirigir a la página de fin_cambio_rollo
         return redirect('fin_produccion')
     else:
@@ -266,7 +270,8 @@ def pana_mantencion(request):
         produccion = models.Produccion.objects.create(
             tipo='pana_mantencion',
             hora_inicio=timezone.now(),
-            hora_termino=timezone.now()  # Se actualiza automáticamente al guardar
+            hora_termino=timezone.now(),  # Se actualiza automáticamente al guardar
+            usuario=request.user
         )
         return redirect('fin_produccion')
 
