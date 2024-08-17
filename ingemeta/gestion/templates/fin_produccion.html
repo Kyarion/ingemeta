@@ -1,18 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ produccion_en_curso.get_tipo_display }}</title>
 </head>
 <body>
-    <h1>{{ produccion_en_curso.get_tipo_display }}</h1>
     <div class="alert alert-warning" role="alert">
-        Hay una producción en curso del tipo <strong>{{ produccion_en_curso.get_tipo_display }}</strong> iniciada el {{ produccion_en_curso.fecha_pedido }} a las {{ produccion_en_curso.hora_inicio|time:"H:i" }}.
+        El tipo de produccion activa actualmente es:  <strong>{{ produccion_en_curso.get_tipo_display }}</strong>. Iniciada el <strong>{{ produccion_en_curso.fecha_pedido }}</strong> a las <strong>{{ produccion_en_curso.hora_inicio|time:"H:i" }}</strong>.
     </div>
     <!-- CAMBIO DE ROLLO -->
     {% if produccion_en_curso.tipo == 'cambio_rollo' %}
-        <form method="post">
+        <form method="post" class="form">
             {% csrf_token %}
             <label for="producto_rollo">Selecciona un rollo:</label>
             <select id="producto_rollo" name="producto_rollo">
@@ -20,11 +20,11 @@
                     <option value="{{ producto.id }}">{{ producto.nombre }}</option>
                 {% endfor %}
             </select>
-            <button type="submit">Finalizar Cambio de Rollo</button>
+            <button class="button" type="submit">Finalizar Cambio de Rollo</button>
         </form>
     <!-- DESPACHO -->
     {% elif produccion_en_curso.tipo == 'despacho' %}
-        <form method="post">
+        <form method="post" class="form">
             {% csrf_token %}
             <label for="opcion_despacho">Seleccione una opción de despacho:</label>
             <select id="opcion_despacho" name="opcion_despacho">
@@ -41,53 +41,71 @@
                         </div>
                     {% endfor %}
                 </div>
-                <button type="button" id="agregar_producto">Agregar Producto</button>
-                <button type="button" id="eliminar_ultimo_producto">Eliminar Último Producto</button>
-            </fieldset>
-        
-            <button type="submit">Terminar despacho y actualizar stock</button>
-        </form>
-
-        <!-- Plantilla para el nuevo formulario de ítem -->
-        <div id="empty_form" style="display: none;">
-            <div class="item-form">
-                {{ item_formset.empty_form.as_p }}
-            </div>
-        </div>
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                var agregarProductoBtn = document.getElementById('agregar_producto');
-                var formsetContainer = document.getElementById('formset-container');
-                var emptyFormTemplate = document.getElementById('empty_form').innerHTML;
-                var formCount = {{ item_formset.total_form_count }};
-
-                agregarProductoBtn.addEventListener('click', function() {
-                    var newForm = document.createElement('div');
-                    newForm.classList.add('item-form');
-                    newForm.innerHTML = emptyFormTemplate.replace(/__prefix__/g, formCount);
-                    formsetContainer.appendChild(newForm);
-                    formCount++;
-
-                    // Actualizar el atributo 'total_form' del formset
-                    document.getElementById('id_form-TOTAL_FORMS').value = formCount;
-                });
-
-                // Event listener para eliminar un formulario de ítem
-                formsetContainer.addEventListener('click', function(event) {
-                    if (event.target && event.target.classList.contains('eliminar-producto')) {
-                        event.target.parentElement.remove();
-                        formCount--;
-
-                        // Actualizar el atributo 'total_form' del formset
-                        document.getElementById('id_form-TOTAL_FORMS').value = formCount;
-                    }
-                });
-            });
-        </script>
+                
+                <div class="button-container">
+                    <button type="button" id="button2" class="fused-button">Agregar Producto</button>
+                    <button type="button" id="button3" class="fused-button">Eliminar Producto</button>
+                </div>
+                </fieldset>
+                
+                <button type="submit" class="button">Terminar y actualizar stock</button>
+                </form>
+                
+                <!-- Plantilla para el nuevo formulario de ítem -->
+                <div id="empty_form" style="display: none;">
+                    <div class="item-form">
+                        {{ item_formset.empty_form.as_p }}
+                    </div>
+                </div>
+                
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        var agregarProductoBtn = document.getElementById('button2');
+                        var eliminarProductoBtn = document.getElementById('button3');
+                        var formsetContainer = document.getElementById('formset-container');
+                        var emptyFormTemplate = document.getElementById('empty_form').innerHTML;
+                        var formCount = {{ item_formset.total_form_count }};
+                
+                        agregarProductoBtn.addEventListener('click', function() {
+                            var newForm = document.createElement('div');
+                            newForm.classList.add('item-form');
+                            newForm.innerHTML = emptyFormTemplate.replace(/__prefix__/g, formCount);
+                            formsetContainer.appendChild(newForm);
+                            formCount++;
+                
+                            // Actualizar el atributo 'total_form' del formset
+                            document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+                        });
+                
+                        eliminarProductoBtn.addEventListener('click', function() {
+                            if (formCount > 0) {
+                                var lastForm = formsetContainer.querySelector('.item-form:last-child');
+                                if (lastForm) {
+                                    lastForm.remove();
+                                    formCount--;
+                
+                                    // Actualizar el atributo 'total_form' del formset
+                                    document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+                                }
+                            }
+                        });
+                
+                        // Event listener para eliminar un formulario de ítem
+                        formsetContainer.addEventListener('click', function(event) {
+                            if (event.target && event.target.classList.contains('eliminar-producto')) {
+                                event.target.parentElement.remove();
+                                formCount--;
+                
+                                // Actualizar el atributo 'total_form' del formset
+                                document.getElementById('id_form-TOTAL_FORMS').value = formCount;
+                            }
+                        });
+                    });
+                </script>
 
     <!-- INGRESO DE MATERIAL -->
     {% elif produccion_en_curso.tipo == 'ingreso_material' %}
-    <form method="post">
+    <form method="post" class="form">
         {% csrf_token %}
         <fieldset>
             <legend>Material de ingreso:</legend>
@@ -137,4 +155,4 @@
     </form>
     {% endif %}
 </body>
-</html>
+{% endblock %}

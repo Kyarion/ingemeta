@@ -1,5 +1,5 @@
 .fondo {
-    background-image: url('/static/imagenes/Fondohome.jpg');
+    background-image: url('/static/imagenes/fondo.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -17,11 +17,9 @@
     font-size: 2em;
 }
 
-.navbar-transparent {
-    background-color: transparent !important;
-    border-bottom: none !important;
-    box-shadow: none !important;
-}
+.navbar {
+    background-color: #4384bf !important; /* Change this to your desired color */
+  }
 
 .abajo {
     position: fixed;
@@ -74,8 +72,8 @@ main {
 
 .iniciar-sesion{
     background-color: transparent;
-    border: 1px solid #198754;
-    color: #198754;
+    border: 1px solid #000000;
+    color: #000000;
     padding: 0.375rem 0.75rem;
     text-align: center;
     text-decoration: none;
@@ -86,18 +84,45 @@ main {
 }
 
 .iniciar-sesion:hover{
-    background-color: #198754;
+    background-color: #000000;
     color: white;
 }
 
-form {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
+.form {
+    background-color: #f9f9f9; /* Light background color */
+    padding: 20px; /* Padding around the form */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 10px; /* Rounded corners */
+    max-width: 500px; /* Maximum width of the form */
+    margin: 20px auto; /* Center the form horizontally */
+}
+
+.form label {
+    display: block; /* Make the label a block element */
+    margin-bottom: 10px; /* Space below the label */
+    font-weight: bold; /* Bold text */
+}
+
+.form select {
+    width: 100%; /* Full width */
+    padding: 10px; /* Padding inside the select */
+    margin-bottom: 20px; /* Space below the select */
+    border: 1px solid #ccc; /* Light border */
+    border-radius: 5px; /* Rounded corners */
+}
+
+.form .button {
+    display: block; /* Make the button a block element */
+    width: 100%; /* Full width */
+    padding: 10px; /* Padding inside the button */
+    background-color: #79a5ff; /* Button background color */
+    color: #000000; /* Button text color */
+    border: 3px solid black; /* Button border */
+    border-radius: 10px; /* Rounded corners */
+    cursor: pointer; /* Pointer cursor on hover */
+    text-align: center; /* Center text horizontally */
+    font-size: 26px; /* Font size */
+    font-weight: bold; /* Bold text */
 }
 
 input {
@@ -107,13 +132,77 @@ input {
     box-sizing: border-box;
 }
 
-button {
-    background-color: #28a745;
-    color: #fff;
+.button {
+    background-color: #79a5ff;  
+    color: #000000;
     padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
+    border: 3px solid black;
+    border-radius: 10px;
     cursor: pointer;
+    text-decoration: none;
+    font-size: 26px;
+    margin: 10px;
+    font-weight: bold;
+    text-align: center; /* Center text horizontally */
+    display: flex; /* Enable flexbox for centering */
+    align-items: center; /* Center text vertically */
+    justify-content: center; /* Center text horizontally */
+}
+
+#button2 {
+    background-color: #22c01d;  
+    color: #000000;
+    padding: 10px 10px;
+    border: 3px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 18px;
+    margin: 10px;
+    font-weight: bold;
+    text-align: center; /* Center text horizontally */
+    display: flex; /* Enable flexbox for centering */
+    align-items: center; /* Center text vertically */
+    justify-content: center; /* Center text horizontally */
+}
+
+#button3 {
+    background-color: #e02323;  
+    color: #ffffff;
+    padding: 10px 10px;
+    border: 3px solid black;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 18px;
+    margin: 10px;
+    font-weight: bold;
+    text-align: center; /* Center text horizontally */
+    display: flex; /* Enable flexbox for centering */
+    align-items: center; /* Center text vertically */
+    justify-content: center; /* Center text horizontally */
+}
+
+.fused-button {
+    background-color: #79a5ff; /* Button background color */
+    color: #000000; /* Button text color */
+    border: 3px solid black; /* Button border */
+    padding: 10px; /* Padding inside the button */
+    font-size: 26px; /* Font size */
+    font-weight: bold; /* Bold text */
+    cursor: pointer; /* Pointer cursor on hover */
+    text-align: center; /* Center text horizontally */
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow buttons to wrap to the next line */
+    gap: 10px; /* Space between buttons */
+}
+
+.button-container button {
+    flex: 1 1 auto; /* Allow buttons to grow and shrink */
+    min-width: 100px; /* Minimum width for buttons */
 }
 
 .contenedor-centrado{
@@ -124,7 +213,7 @@ button {
 }
 
 .fondo-login {
-    background-image: url('/static/imagenes/FondoLogin.jpg');
+    background-image: url('/static/imagenes/fondo.jpg');
     background-size: cover;
     background-repeat: no-repeat;
     background-attachment: fixed;
@@ -166,6 +255,9 @@ margin-bottom: 0;
 }
 
 h1{
-    color: white;
+    color: #486cae;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    background-color: #f0f0f0; /* Add background color */
+    padding: 10px;
+    margin-bottom: 20px;
 }

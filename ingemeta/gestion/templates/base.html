@@ -11,15 +11,17 @@
   <body class="{% block body_class %}fondo{% endblock %}">
     <nav class="navbar navbar-expand-lg fixed-top bg-body-tertiary">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Ingemeta</a>
+        <a class="navbar-brand" href="/home">Ingemeta</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <!--
             <li class="nav-item">
               <a class="nav-link active" aria-current="page" href="/home">Home</a>
             </li>
+            -->
               {% if user.is_authenticated %}
             <li class="nav-item">
               <a class="nav-link" aria-current="page" href="/produccion">Producción</a>
@@ -43,9 +45,11 @@
            {% if user.is_authenticated %}
             <a class="cerrar-sesion" href="{% url 'logout' %}">Cerrar sesión</a>
             {% else %}
+              <!--
               <a class="iniciar-sesion" href="{% url 'registro' %}">Registrarse</a>
+              -->
               <a class="iniciar-sesion" href="{% url 'signin' %}">Inicio de Sesion</a>
-            {% endif %}
+              {% endif %}
             </form>
           </div>
         </div>
@@ -54,18 +58,19 @@
     <main>
     </main>
 </body>
-    <!---->
+    <!--
     <nav class="navbar fixed-bottom bg-body-tertiary" style="background-color: #00ff00;">
       <div class="container-fluid">
         <div class="mr-auto">
           <a class="navbar-brand" href="">contacto@ingemeta.cl</a>
         </div>
     
-        <!-- Elementos en el extremo derecho -->
+        
         <div class="ml-auto">
           <h1></h1>
       </div>
     </nav>
+    -->
       {% block content %}
       {% endblock %}
   </body>

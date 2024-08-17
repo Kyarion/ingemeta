@@ -15,10 +15,6 @@ class Stock(models.Model):
     nombre_stock = models.CharField(max_length=30)
     cantidad_stock = models.IntegerField()
 
-class ProduccionIdeal(models.Model):
-    nombre_produccion = models.CharField(max_length=30)
-    produccionideal = models.IntegerField()
-
 class Produccion(models.Model):
     TIPOS_CHOICES = [
         ('cambio_rollo', 'Cambio de Rollo'),
@@ -28,7 +24,6 @@ class Produccion(models.Model):
         ('produccion', 'Producción'),
         ('setup_ajustes', 'Setup o Ajustes'),
     ]
-
     nombre_producto = models.CharField(max_length=30)
     fecha_pedido = models.DateField(auto_now_add=True)
     hora_inicio = models.TimeField()
@@ -90,8 +85,5 @@ class OrdenProduccion(models.Model):
 
     class Meta:
         ordering = ['numero_secuencia', '-cantidad']  # Ordena por cantidad de forma predeterminada
-
-# orden_produccion_queryset = OrdenProduccion.objects.order_by('numero_secuencia') usar este codigo para el orden manual
-# orden_produccion_queryset = OrdenProduccion.objects.all() usar este codigo para el orden por cantidad
 
 
